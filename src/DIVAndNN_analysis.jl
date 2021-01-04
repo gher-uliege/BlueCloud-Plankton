@@ -27,61 +27,15 @@ maximumDepthInMeters = getcolumn("maximumDepthInMeters")
 @show extrema(minimumDepthInMeters)
 @show extrema(maximumDepthInMeters)
 
-#maybedownload("https://www.ncei.noaa.gov/thredds-ocean/fileServer/ncei/woa/temperature/decav/0.25/woa18_decav_t00_04.nc",
-#              joinpath(datadir,"woa18_decav_t00_04.nc"))
-
-
-
-# place a copy of the 24 files (12 month, temperature and salinity) from the following addresses
-# in datadir
-# https://files.seadatanet.org/climatologies/Global_Ocean/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_T_V2_1_1900_2017_025/
-# https://files.seadatanet.org/climatologies/Global_Ocean/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_S_V2_1_1900_2017_025/
-
-months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
-
-
-datalist = [
-   (varname = "Temperature",
-    urls = map(m -> replace("https://files.seadatanet.org/climatologies/Global_Ocean/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_T_V2_1_1900_2017_025/SDC_GLO_CLIM_T_V2_1_1900_2017_025_April.nc","April" => m),months)),
-
-   (varname = "Salinity",
-    urls = map(m -> replace("https://files.seadatanet.org/climatologies/Global_Ocean/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_TS_V2/SDC_GLO_CLIM_S_V2_1_1900_2017_025/SDC_GLO_CLIM_S_V2_1_1900_2017_025_April.nc","April" => m),months)),
+data_TS = [
+    ("http://www.ifremer.fr/erddap/griddap/SDC_GLO_CLIM_TS_V2_1","Salinity","salinity"),
+    ("http://www.ifremer.fr/erddap/griddap/SDC_GLO_CLIM_TS_V2_1","Temperature","temperature"),
+    ("https://www.ncei.noaa.gov/thredds-ocean/dodsC/ncei/woa/nitrate/all/1.00/woa18_all_n00_01.nc","n_an","nitrate"),
+    ("https://www.ncei.noaa.gov/thredds-ocean/dodsC/ncei/woa/silicate/all/1.00/woa18_all_i00_01.nc","i_an","silicate"),
+    ("https://www.ncei.noaa.gov/thredds-ocean/dodsC/ncei/woa/phosphate/all/1.00/woa18_all_p00_01.nc","p_an","phosphate"),
 ]
 
-
-for l = 1:length(datalist)
-    varname = datalist[l].varname
-    urls = datalist[l].urls
-    interp_fname = joinpath(datadir,"$(lowercase(varname)).nc")
-    if isfile(interp_fname)
-        @info "$interp_fname already there"
-        continue
-    end
-
-    fullnames = joinpath.(datadir,basename.(urls))
-
-    # sadly, you need to manual download
-    #maybedownload.(urls,fullnames)
-
-    ds = NCDataset(fullnames,aggdim = "time")
-
-    Tlon = ds["lon"][:]
-    Tlat = ds["lat"][:]
-    Tz = ds["depth"][:]
-
-    # extract surface value
-    k = 1
-    @show Tz[k]
-
-    Tmean = mean(nomissing(ds[varname][:,:,k,:],NaN),dims=3)[:,:,1];
-    Tmean = DIVAnd.ufill(Tmean,isfinite.(Tmean))
-
-    # check range
-    @show extrema(Tmean)
-
-    DIVAndNN.saveinterp((Tlon,Tlat),Tmean,(gridlon,gridlat),varname,interp_fname)
-    close(ds)
-end
+DIVAndNN.prep_tempsalt(gridlon,gridlat,data_TS,datadir)
 
 # take all years
 years = 0:3000
@@ -133,14 +87,12 @@ covars_const = true
 covars_fname = [
     ("bathymetry.nc","batymetry",identity),
     ("dist2coast_subset.nc","distance",identity),
-    #("Chlorophyll/chloro_reinterp.nc","chla",identity),
-    #("oxygen_reinterp2.nc","oxygen",identity),
     #("salinity.nc","salinity",log),
     ("salinity.nc","salinity",identity),
     ("temperature.nc","temperature",identity),
-    #("nitrogen.nc",      "nitrogen",identity),
-    #("phosphate.nc",     "phosphate",identity),
-    #("silicate.nc",      "silicate",identity),
+    ("nitrate.nc",      "nitrate",identity),
+    ("phosphate.nc",     "phosphate",identity),
+    ("silicate.nc",      "silicate",identity),
 ]
 #covars_fname = []
 covars_fname = map(entry -> (joinpath(datadir,entry[1]),entry[2:end]...),covars_fname)
