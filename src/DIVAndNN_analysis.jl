@@ -119,13 +119,20 @@ else
 end
 
 
+# Distance to coast
+interp_fname = joinpath(datadir,"dist2coast_subset.nc")
+fname_dist2coast = "https://pae-paha.pacioos.hawaii.edu/thredds/dodsC/dist2coast_1deg"
+if !isfile(interp_fname)
+    DIVAndNN.prep_dist2coast(fname_dist2coast,gridlon,gridlat,interp_fname)
+end
+
 covars_coord = false
 covars_const = true
 
 # load covariables
 covars_fname = [
     ("bathymetry.nc","batymetry",identity),
-    #            ("dist2coast_subset.nc","distance",identity),
+    ("dist2coast_subset.nc","distance",identity),
     #("Chlorophyll/chloro_reinterp.nc","chla",identity),
     #("oxygen_reinterp2.nc","oxygen",identity),
     #("salinity.nc","salinity",log),
