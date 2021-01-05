@@ -1,3 +1,24 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,jl:percent
+#     text_representation:
+#       extension: .jl
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.3.4
+#   kernelspec:
+#     display_name: Julia 1.5.1
+#     language: julia
+#     name: julia-1.5
+# ---
+
+# %% [markdown]
+# # BlueCloud Zooplankton Demonstrator
+
+
+# %%
 using DIVAnd
 using DIVAndNN
 using Random
@@ -12,21 +33,44 @@ using Dates
 using JSON
 using PyPlot
 
-Random.seed!(1234)
+# %% [markdown]
+# Set seed for random number generator and include grid information
 
+# %%
+Random.seed!(1234)
 include("grid.jl")
 
-datafile = joinpath(datadir, "data.csv")
+# %% [markdown]
+# Data frome the continuous plankton recorder
+# https://www.cprsurvey.org/services/the-continuous-plankton-recorder/
 
+# %%
+datafile = joinpath(datadir, "data-cpr.csv")
+maybedownload("https://dox.ulg.ac.be/index.php/s/ME3U5wPdPK8GRFu/download",
+              datafile)
+
+
+# %% [markdown]
+# Check the depth range of the observations
+
+# %%
 data, columnnames = readdlm(datafile, ',', header=true);
 getcolumn(name) = data[:,findfirst(columnnames[:] .== name)]
 
+# %%
 # check the depth range of the data
 minimumDepthInMeters = getcolumn("minimumDepthInMeters")
 maximumDepthInMeters = getcolumn("maximumDepthInMeters")
 @show extrema(minimumDepthInMeters)
 @show extrema(maximumDepthInMeters)
 
+
+# %% [markdown]
+# The prepare following fields:
+# * Temperature and salinity from SeaDataCloud
+# * Nitrate, silicate and phosphate from World Ocean Atlas 2018
+
+# %%
 data_TS = [
     ("http://www.ifremer.fr/erddap/griddap/SDC_GLO_CLIM_TS_V2_1","Salinity","salinity"),
     ("http://www.ifremer.fr/erddap/griddap/SDC_GLO_CLIM_TS_V2_1","Temperature","temperature"),
@@ -37,12 +81,17 @@ data_TS = [
 
 DIVAndNN.prep_tempsalt(gridlon,gridlat,data_TS,datadir)
 
-# take all years
+# %% [markdown]
+# Take all years
+
+# %%
 years = 0:3000
 ndimensions = 2
 
-# land-sea mask and domain parameters
+# %% [markdown]
+# Get bathymetry from GEBCO and prepare land-sea mask
 
+# %%
 bathname = joinpath(datadir,"gebco_30sec_4.nc");
 bathisglobal = true;
 maybedownload("https://dox.ulg.ac.be/index.php/s/RSwm4HPHImdZoQP/download",
@@ -58,9 +107,7 @@ ds = Dataset(maskname,"r")
 mask = nomissing(ds["mask"][:,:]) .== 1
 close(ds)
 
-# Interpolate the bathymetry
 DIVAndNN.prep_bath(bathname,bathisglobal,gridlon,gridlat,datadir)
-
 
 if ndimensions == 3
     mask = repeat(mask,inner=(1,1,length(years)))
@@ -73,28 +120,34 @@ else
 end
 
 
+# %% [markdown]
 # Distance to coast
+
+# %%
 interp_fname = joinpath(datadir,"dist2coast_subset.nc")
 fname_dist2coast = "https://pae-paha.pacioos.hawaii.edu/thredds/dodsC/dist2coast_1deg"
 if !isfile(interp_fname)
     DIVAndNN.prep_dist2coast(fname_dist2coast,gridlon,gridlat,interp_fname)
 end
 
+# %% [markdown]
+# load covariables for the neural network
+
+# %%
 covars_coord = false
 covars_const = true
 
-# load covariables
 covars_fname = [
-    ("bathymetry.nc","batymetry",identity),
-    ("dist2coast_subset.nc","distance",identity),
+    ("bathymetry.nc",       "batymetry",  identity),
+    ("dist2coast_subset.nc","distance",   identity),
     #("salinity.nc","salinity",log),
-    ("salinity.nc","salinity",identity),
-    ("temperature.nc","temperature",identity),
-    ("nitrate.nc",      "nitrate",identity),
-    ("phosphate.nc",     "phosphate",identity),
-    ("silicate.nc",      "silicate",identity),
+    ("salinity.nc",         "salinity",   identity),
+    ("temperature.nc",      "temperature",identity),
+    ("nitrate.nc",          "nitrate",    identity),
+    ("phosphate.nc",        "phosphate",  identity),
+    ("silicate.nc",         "silicate",   identity),
 ]
-#covars_fname = []
+
 covars_fname = map(entry -> (joinpath(datadir,entry[1]),entry[2:end]...),covars_fname)
 
 field = DIVAndNN.loadcovar((gridlon,gridlat),covars_fname;
@@ -107,12 +160,25 @@ if ndimensions == 3
 end
 DIVAndNN.normalize!(mask,field)
 
+
+# %% [markdown]
+# Read data files
+
+# %%
 lon, lat, dates, abundance, scientificNames = BlueCloudPlankton.read_data(datafile)
 
-scientificname_accepted = unique(scientificNames)
+# %% [markdown]
+# all unique scientific names
 
+# %%
+scientificname_accepted = unique(scientificNames)
 @show unique(scientificNames)
 
+
+# %% [markdown]
+# Randomly choose cross-validation point
+
+# %%
 cvfname = replace(datafile,".csv" => "-cv.nc")
 validation_fraction = 0.2
 
@@ -137,11 +203,16 @@ end
 @show sum(for_cv)
 @show sum(.!for_cv)
 
+# %% [markdown]
+# time correlation (for 3d analyses)
+
+# %%
 lent = 0. # years
 if ndimensions == 3
     lent = 5.
 end
 
+# %%
 plotevery = 100
 niter = 500
 trainfrac = 1.
@@ -160,11 +231,10 @@ len = 75e3
 len = 200e3
 len = 300e3
 
-#for len = [50e3, 75e3, 100e3, 125e3]
+# for len = [50e3, 75e3, 100e3, 125e3]
 #    for epsilon2ap = [1, 5, 10, 50, 100, 500]
-#for len = [100e3]
-#    for epsilon2ap = [0.1]
 
+# %%
         outdir = joinpath(resdir,"results-ncovars$(length(covars_fname))-epsilon2ap$(epsilon2ap)-len$(len)-niter$(niter)-nlayers$(length(NLayers))-ndimensions$(ndimensions)")
         mkpath(outdir)
 
@@ -294,8 +364,7 @@ len = 300e3
                 )
             ))
         end
-
 #    end
-#end
+# end
 
 
