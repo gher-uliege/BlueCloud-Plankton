@@ -51,7 +51,6 @@ bx,by,b = DIVAnd.extract_bath(bathname,bathisglobal,gridlon,gridlat);
 expdir = joinpath(resdir,"results-ncovars3-epsilon2ap10-len300000.0-niter500-nlayers3-ndimensions2")
 lon, lat, dates, value, scientificNames = BlueCloudPlankton.read_data(datafile)
 scientificname_accepted = unique(scientificNames)
-@show unique(scientificNames)
 
 # %% [markdown]
 # Helper functions for plotting
@@ -106,10 +105,10 @@ end
 
 # %%
 filenames = glob("*nc",expdir);
-plotfield(filenames[1])
+plotfield(filenames[1]);
 
 # %% [markdown]
 # Plot the all species
 
 # %%
-plotfield.(filenames)
+plotfield.(filenames);
