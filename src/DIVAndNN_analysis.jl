@@ -18,6 +18,17 @@
 # # BlueCloud Zooplankton Demonstrator
 
 
+using Pkg
+
+try
+    # check if DIVAndNN is already installed
+    using DIVAndNN
+catch
+    # install all dependencies
+    pkg"add https://github.com/gher-ulg/DIVAndNN.jl"
+    pkg"add JSON PyCall PyPlot DIVAnd Glob DataStructures NCDatasets"
+end
+
 # %%
 using DIVAnd
 using DIVAndNN
@@ -78,6 +89,9 @@ data_TS = [
     ("https://www.ncei.noaa.gov/thredds-ocean/dodsC/ncei/woa/silicate/all/1.00/woa18_all_i00_01.nc","i_an","silicate"),
     ("https://www.ncei.noaa.gov/thredds-ocean/dodsC/ncei/woa/phosphate/all/1.00/woa18_all_p00_01.nc","p_an","phosphate"),
 ]
+
+maybedownload("https://dox.ulg.ac.be/index.php/s/7zwCEszAPIFeBAm/download","../data/salinity.nc")
+maybedownload("https://dox.ulg.ac.be/index.php/s/OQMYYGFCEtS3xc9/download","../data/temperature.nc")
 
 DIVAndNN.prep_tempsalt(gridlon,gridlat,data_TS,datadir)
 
