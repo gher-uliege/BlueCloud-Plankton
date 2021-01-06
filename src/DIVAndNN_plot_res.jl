@@ -3,7 +3,6 @@
 #   jupytext:
 #     cell_metadata_filter: -all
 #     formats: ipynb,jl:percent
-#     main_language: julia
 #     text_representation:
 #       extension: .jl
 #       format_name: percent

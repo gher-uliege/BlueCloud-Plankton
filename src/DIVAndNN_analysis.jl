@@ -16,8 +16,13 @@
 
 # %% [markdown]
 # # BlueCloud Zooplankton Demonstrator
+#
+# The aim of this notebook is to created a gridded dataset of the
+# Continuous Plankton Recorder within the VRE context of BlueCloud
+#
+# The first step is to install all dependencies (if necessary)
 
-
+# %%
 using Pkg
 
 try
@@ -28,6 +33,9 @@ catch
     pkg"add https://github.com/gher-ulg/DIVAndNN.jl"
     pkg"add JSON PyCall PyPlot DIVAnd Glob DataStructures NCDatasets"
 end
+
+# %% [markdown]
+# Load the modules
 
 # %%
 using DIVAnd
@@ -214,6 +222,10 @@ else
     end
 end
 
+# %% [markdown]
+# Number of data used for cross-validation and for the analysis
+
+# %%
 @show sum(for_cv)
 @show sum(.!for_cv)
 
@@ -241,144 +253,140 @@ learning_rate = 0.001
 L2reg = 0.0001
 dropoutprob = 0.6
 
-len = 75e3
-len = 200e3
 len = 300e3
 
-# for len = [50e3, 75e3, 100e3, 125e3]
-#    for epsilon2ap = [1, 5, 10, 50, 100, 500]
 
 # %%
-        outdir = joinpath(resdir,"results-ncovars$(length(covars_fname))-epsilon2ap$(epsilon2ap)-len$(len)-niter$(niter)-nlayers$(length(NLayers))-ndimensions$(ndimensions)")
-        mkpath(outdir)
+outdir = joinpath(resdir,"results-ncovars$(length(covars_fname))-epsilon2ap$(epsilon2ap)-len$(len)-niter$(niter)-nlayers$(length(NLayers))-ndimensions$(ndimensions)")
+mkpath(outdir)
 
-        nameindex = 1
-        for nameindex in 1:length(scientificname_accepted)
-        #for nameindex in 1:1
+nameindex = 1
+for nameindex in 1:length(scientificname_accepted)
+    #for nameindex in 1:1
 
-            sname = String(scientificname_accepted[nameindex])
-            global loss_iter
-            global val_iter
-            @info sname
+    sname = String(scientificname_accepted[nameindex])
+    global loss_iter
+    global val_iter
+    @info sname
 
-            paramname = joinpath(outdir,"DIVAndNN_$(sname)_interp.json")
+    paramname = joinpath(outdir,"DIVAndNN_$(sname)_interp.json")
 
-            if isfile(paramname)
-#                continue
-            end
+    if isfile(paramname)
+        #                continue
+    end
 
-            s = (sname .== scientificNames) .& .!for_cv
-            lon_a,lat_a,obstime_a,value_a = lon[s], lat[s], dates[s], abundance[s]
-            @info "number of observation used in analysis: $(sum(s))"
+    s = (sname .== scientificNames) .& .!for_cv
+    lon_a,lat_a,obstime_a,value_a = lon[s], lat[s], dates[s], abundance[s]
+    @info "number of observation used in analysis: $(sum(s))"
 
-            s = (sname .== scientificNames) .& for_cv
-            lon_cv,lat_cv,obstime_cv,value_cv = lon[s], lat[s], dates[s], abundance[s]
-            @info "number of observation used for validation: $(sum(s))"
+    s = (sname .== scientificNames) .& for_cv
+    lon_cv,lat_cv,obstime_cv,value_cv = lon[s], lat[s], dates[s], abundance[s]
+    @info "number of observation used for validation: $(sum(s))"
 
-            time_a = Float64.(Dates.year.(obstime_a))
-            time_cv = Float64.(Dates.year.(obstime_cv))
+    time_a = Float64.(Dates.year.(obstime_a))
+    time_cv = Float64.(Dates.year.(obstime_cv))
 
-            @show value_a[1:min(end,10)]
-            @show extrema(value_a)
-            @show length(value_a)
+    @debug begin
+        @show value_a[1:min(end,10)]
+        @show extrema(value_a)
+        @show length(value_a)
+    end
 
-            Random.seed!(1234)
+    Random.seed!(1234)
 
-            value_analysis = zeros(size(mask))
+    value_analysis = zeros(size(mask))
 
-            if ndimensions == 3
-                xobs_a = (lon_a,lat_a,time_a)
-                xobs_cv = (lon_cv,lat_cv,time_cv)
-                lenxy = (len,len,lent)
-                analysis_grid = (gridlon,gridlat,years)
-            else
-                xobs_a = (lon_a,lat_a)
-                xobs_cv = (lon_cv,lat_cv)
-                lenxy = (len,len)
-                analysis_grid = (gridlon,gridlat)
-            end
+    if ndimensions == 3
+        xobs_a = (lon_a,lat_a,time_a)
+        xobs_cv = (lon_cv,lat_cv,time_cv)
+        lenxy = (len,len,lent)
+        analysis_grid = (gridlon,gridlat,years)
+    else
+        xobs_a = (lon_a,lat_a)
+        xobs_cv = (lon_cv,lat_cv)
+        lenxy = (len,len)
+        analysis_grid = (gridlon,gridlat)
+    end
 
 
-            loss_iter = []
-            val_iter = []
+    loss_iter = []
+    val_iter = []
 
-            function plotres(i,lossi,value_analysis,y,gradloss,out,iobssel,obspos)
-                #@show extrema(value_analysis[isfinite.(value_analysis)])
-                vp = DIVAndNN.validate_regression(analysis_grid,value_analysis,xobs_cv,value_cv)
-                push!(loss_iter,lossi)
-                push!(val_iter,vp)
-	            @printf("| %10d | %30.5f | %30.5f |\n",i,lossi,vp)
-            end
+    function plotres(i,lossi,value_analysis,y,gradloss,out,iobssel,obspos)
+        #@show extrema(value_analysis[isfinite.(value_analysis)])
+        vp = DIVAndNN.validate_regression(analysis_grid,value_analysis,xobs_cv,value_cv)
+        push!(loss_iter,lossi)
+        push!(val_iter,vp)
+	    @printf("| %10d | %30.5f | %30.5f |\n",i,lossi,vp)
+    end
 
-            value_analysis,fw0 = DIVAndNN.analysisprob(
-                mask,pmn,xyi,xobs_a,
-                value_a,
-                lenxy,epsilon2ap,
-                field,
-                NLayers,
-                costfun = DIVAndNN.regression,
-                niter = niter,
-                dropoutprob = dropoutprob,
-                L2reg = L2reg,
-                learning_rate = learning_rate,
-	            plotres = plotres,
-	            plotevery = plotevery,
-                rmaverage = true,
-                trainfrac = trainfrac,
-                epsilon2_background = epsilon2_background,
+    value_analysis,fw0 = DIVAndNN.analysisprob(
+        mask,pmn,xyi,xobs_a,
+        value_a,
+        lenxy,epsilon2ap,
+        field,
+        NLayers,
+        costfun = DIVAndNN.regression,
+        niter = niter,
+        dropoutprob = dropoutprob,
+        L2reg = L2reg,
+        learning_rate = learning_rate,
+	    plotres = plotres,
+	    plotevery = plotevery,
+        rmaverage = true,
+        trainfrac = trainfrac,
+        epsilon2_background = epsilon2_background,
+    )
+
+    vp = DIVAndNN.validate_regression(analysis_grid,value_analysis,xobs_cv,value_cv)
+    @show vp
+
+    outname = joinpath(outdir,"DIVAndNN_$(sname)_interp.nc")
+
+    cpme = DIVAnd_cpme(mask,pmn,xyi,xobs_a,value_a,lenxy,epsilon2_cpme)
+    DIVAnd.save(outname,(gridlon,gridlat),value_analysis,sname; relerr = cpme)
+
+    open(paramname,"w") do f
+        write(f,JSON.json(
+            Dict(
+                "validation" => vp,
+                "L2reg" =>            L2reg,
+                "dropoutprob" =>      dropoutprob,
+                "epsilon2ap" =>       epsilon2ap,
+                "epsilon2_background" => epsilon2_background,
+                "len" =>              len,
+                "niter" =>            niter,
+                "learning_rate" =>    learning_rate,
+                "NLayers" =>    NLayers,
+                "name" =>    sname,
+                "loss_iter" => loss_iter,
+                "val_iter" => val_iter,
+                "covars" => first.(covars_fname),
             )
+        ))
+    end
 
-            vp = DIVAndNN.validate_regression(analysis_grid,value_analysis,xobs_cv,value_cv)
-            @show vp
+end
 
-            outname = joinpath(outdir,"DIVAndNN_$(sname)_interp.nc")
+score = DIVAndNN.summary(outdir)
 
-            cpme = DIVAnd_cpme(mask,pmn,xyi,xobs_a,value_a,lenxy,epsilon2_cpme)
-            DIVAnd.save(outname,(gridlon,gridlat),value_analysis,sname; relerr = cpme)
+paramname2 = joinpath(outdir,"DIVAndNN.json")
 
-            open(paramname,"w") do f
-                write(f,JSON.json(
-                    Dict(
-                        "validation" => vp,
-                        "L2reg" =>            L2reg,
-                        "dropoutprob" =>      dropoutprob,
-                        "epsilon2ap" =>       epsilon2ap,
-                        "epsilon2_background" => epsilon2_background,
-                        "len" =>              len,
-                        "niter" =>            niter,
-                        "learning_rate" =>    learning_rate,
-                        "NLayers" =>    NLayers,
-                        "name" =>    sname,
-                        "loss_iter" => loss_iter,
-                        "val_iter" => val_iter,
-                        "covars" => first.(covars_fname),
-                    )
-                ))
-            end
-
-        end
-
-        score = DIVAndNN.summary(outdir)
-
-        paramname2 = joinpath(outdir,"DIVAndNN.json")
-
-        open(paramname2,"w") do f
-            write(f,JSON.json(
-                Dict(
-                    "validation" => score,
-                    "L2reg" =>            L2reg,
-                    "dropoutprob" =>      dropoutprob,
-                    "epsilon2ap" =>       epsilon2ap,
-                    "epsilon2_background" => epsilon2_background,
-                    "len" =>              len,
-                    "niter" =>            niter,
-                    "learning_rate" =>    learning_rate,
-                    "NLayers" =>    NLayers,
-                    "covars" => first.(covars_fname),
-                )
-            ))
-        end
-#    end
-# end
+open(paramname2,"w") do f
+    write(f,JSON.json(
+        Dict(
+            "validation" => score,
+            "L2reg" =>            L2reg,
+            "dropoutprob" =>      dropoutprob,
+            "epsilon2ap" =>       epsilon2ap,
+            "epsilon2_background" => epsilon2_background,
+            "len" =>              len,
+            "niter" =>            niter,
+            "learning_rate" =>    learning_rate,
+            "NLayers" =>    NLayers,
+            "covars" => first.(covars_fname),
+        )
+    ))
+end
 
 
