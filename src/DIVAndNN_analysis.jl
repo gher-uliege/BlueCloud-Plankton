@@ -86,8 +86,8 @@ maximumDepthInMeters = getcolumn("maximumDepthInMeters")
 
 # %% [markdown]
 # The prepare following fields:
-# * Temperature and salinity from SeaDataCloud
-# * Nitrate, silicate and phosphate from World Ocean Atlas 2018
+# * [Temperature and salinity from SeaDataCloud](https://doi.org/10.13155/77512)
+# * Nitrate, silicate and phosphate from [World Ocean Atlas 2018](https://www.ncei.noaa.gov/products/world-ocean-atlas)
 
 # %%
 data_TS = [
@@ -139,7 +139,7 @@ if ndimensions == 3
     mask2,pmn,xyi = DIVAnd.domain(bathname,bathisglobal,gridlon,gridlat,years);
 else
     mask2,pmn,xyi = DIVAnd.domain(bathname,bathisglobal,gridlon,gridlat);
-end
+end;
 
 
 # %% [markdown]
@@ -187,14 +187,14 @@ DIVAndNN.normalize!(mask,field)
 # Read data files
 
 # %%
-lon, lat, dates, abundance, scientificNames = BlueCloudPlankton.read_data(datafile)
+lon, lat, dates, abundance, scientificNames = BlueCloudPlankton.read_data(datafile);
 
 # %% [markdown]
 # all unique scientific names
 
 # %%
 scientificname_accepted = unique(scientificNames)
-@show unique(scientificNames)
+println.(unique(scientificNames));
 
 
 # %% [markdown]
@@ -220,7 +220,7 @@ else
             "long_name" => "0: observation used for analysis; 1 observation used for validation")
                )
     end
-end
+end;
 
 # %% [markdown]
 # Number of data used for cross-validation and for the analysis
@@ -253,7 +253,7 @@ learning_rate = 0.001
 L2reg = 0.0001
 dropoutprob = 0.6
 
-len = 300e3
+len = 300e3;
 
 
 # %%
@@ -262,7 +262,6 @@ mkpath(outdir)
 
 nameindex = 1
 for nameindex in 1:length(scientificname_accepted)
-    #for nameindex in 1:1
 
     sname = String(scientificname_accepted[nameindex])
     global loss_iter
@@ -317,7 +316,7 @@ for nameindex in 1:length(scientificname_accepted)
         vp = DIVAndNN.validate_regression(analysis_grid,value_analysis,xobs_cv,value_cv)
         push!(loss_iter,lossi)
         push!(val_iter,vp)
-	    @printf("| %10d | %30.5f | %30.5f |\n",i,lossi,vp)
+        @printf("| %10d | %30.5f | %30.5f |\n",i,lossi,vp)
     end
 
     value_analysis,fw0 = DIVAndNN.analysisprob(
@@ -331,16 +330,14 @@ for nameindex in 1:length(scientificname_accepted)
         dropoutprob = dropoutprob,
         L2reg = L2reg,
         learning_rate = learning_rate,
-	    plotres = plotres,
-	    plotevery = plotevery,
+        plotres = plotres,
+        plotevery = plotevery,
         rmaverage = true,
         trainfrac = trainfrac,
         epsilon2_background = epsilon2_background,
     )
 
     vp = DIVAndNN.validate_regression(analysis_grid,value_analysis,xobs_cv,value_cv)
-    @show vp
-
     outname = joinpath(outdir,"DIVAndNN_$(sname)_interp.nc")
 
     cpme = DIVAnd_cpme(mask,pmn,xyi,xobs_a,value_a,lenxy,epsilon2_cpme)
@@ -387,6 +384,6 @@ open(paramname2,"w") do f
             "covars" => first.(covars_fname),
         )
     ))
-end
+end;
 
 
