@@ -84,7 +84,6 @@ function plotfield(filename)
         @warn "setting explicitly lower scale to $(cl[1]) for $sname"
     end
 
-    @show cl
     norm = PyPlot.matplotlib.colors.LogNorm(vmin=cl[1], vmax=cl[2])
 
     clf()
