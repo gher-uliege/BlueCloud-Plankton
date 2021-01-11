@@ -5,7 +5,12 @@ push!(LOAD_PATH, joinpath(pwd(), "../src/"))
 using BlueCloudPlankton
 using Glob
 
-datadir = "../data/"
+srcdir = dirname(pathof(BlueCloudPlankton))
+
+datadir = joinpath(srcdir,"../data/")
+if !isdir(datadir)
+    mkdir(datadir)
+end
 
 @testset "Data reading" begin
     datafiletest = joinpath(datadir, "data_small.csv")
