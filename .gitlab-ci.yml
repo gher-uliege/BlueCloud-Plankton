@@ -3,6 +3,8 @@ image: julia:1.5                # image comes from Docker hub
 before_script:
   - export PYTHON=""
   - julia --project=@. -e "import Pkg; Pkg.build()"
+  - julia --project=@. -e 'import Pkg; pkg"add Conda"'
+  - julia --project=@. -e "using Conda; Conda.add("Cartopy")"
 
 default:
   script:
