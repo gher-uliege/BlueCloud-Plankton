@@ -45,12 +45,25 @@ bathisglobal = true;
 bx,by,b = DIVAnd.extract_bath(bathname,bathisglobal,gridlon,gridlat);
 
 # %% [markdown]
-# Load observations and analysis
+# Load observations
 
 # %%
-expdir = joinpath(resdir,"results-ncovars3-epsilon2ap10-len300000.0-niter500-nlayers3-ndimensions2")
+
 lon, lat, dates, value, scientificNames = BlueCloudPlankton.read_data(datafile)
 scientificname_accepted = unique(scientificNames)
+
+# %% [markdown]
+# Load analysis
+
+# %%
+
+function createtime(dirn)
+    open(dirn) do f
+        return mtime(f)
+    end
+end
+
+expdir = last(sort(joinpath.(resdir,readdir(resdir)),by = createtime))
 
 # %% [markdown]
 # Helper functions for plotting
