@@ -3,6 +3,7 @@ using Dates
 using Statistics
 push!(LOAD_PATH, joinpath(pwd(), "../src/"))
 using BlueCloudPlankton
+using Glob
 
 datadir = "../data/"
 
@@ -20,4 +21,12 @@ datadir = "../data/"
     @test lat[1] == 44.008
     @test dates[2] == DateTime(2017, 3, 13, 2, 50)
     @test scientificNames[4] == "Metridia lucens"
+end
+
+@testset "DIVAndNN" begin
+    srcdir = dirname(pathof(BlueCloudPlankton))
+    include(joinpath(srcdir,"DIVAndNN_analysis.jl"))
+    include(joinpath(srcdir,"DIVAndNN_plot_res.jl"))
+    # check presence of NetCDF files
+    @test length(glob("../results/*/*nc",srcdir)) > 0
 end
