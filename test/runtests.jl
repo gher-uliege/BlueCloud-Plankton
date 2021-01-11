@@ -29,7 +29,6 @@ end
 end
 
 @testset "DIVAndNN" begin
-    srcdir = dirname(pathof(BlueCloudPlankton))
     include(joinpath(srcdir,"DIVAndNN_analysis.jl"))
     include(joinpath(srcdir,"DIVAndNN_plot_res.jl"))
     # check presence of NetCDF files

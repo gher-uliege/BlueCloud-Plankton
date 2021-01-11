@@ -3,9 +3,11 @@
 gridlon = -90.:0.5:40.
 gridlat = 30.:0.5:80.
 
-datadir = "../data/"
-resdir = "../results/"
-figdir = "../figures"
+srcdir = dirname(pathof(BlueCloudPlankton))
+
+datadir = joinpath(srcdir,"../data/")
+resdir = joinpath(srcdir,"../results/")
+figdir = joinpath(srcdir,"../figures/")
 
 if !isdir(datadir)
     mkdir(datadir)
