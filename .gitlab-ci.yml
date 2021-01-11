@@ -1,7 +1,7 @@
 image: julia:1.5                # image comes from Docker hub
 
 before_script:
-  - python3 -m pip install --user matplotlib
+  - export PYTHON=""
   - julia --project=@. -e "import Pkg; Pkg.build()"
 
 default:
