@@ -4,7 +4,7 @@ before_script:
   - export PYTHON=""
   - julia --project=@. -e "using Pkg; Pkg.build()"
   - julia --project=@. -e 'using Pkg; pkg"add Conda"'
-  - julia --project=@. -e "using Conda; Conda.add("Cartopy")"
+  - julia --project=@. -e 'using Conda; Conda.add("Cartopy")'
 
 default:
   script:
