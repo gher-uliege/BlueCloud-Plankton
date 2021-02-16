@@ -7,9 +7,11 @@ using Glob
 
 srcdir = dirname(pathof(BlueCloudPlankton))
 
-datadir = joinpath(srcdir,"../data/")
+include(joinpath(srcdir,"grid.jl"))
+
+@info "datadir: $datadir"
 if !isdir(datadir)
-    mkdir(datadir)
+    mkpath(datadir)
 end
 
 @testset "Data reading" begin
@@ -32,5 +34,5 @@ end
     include(joinpath(srcdir,"DIVAndNN_analysis.jl"))
     include(joinpath(srcdir,"DIVAndNN_plot_res.jl"))
     # check presence of NetCDF files
-    @test length(glob("../results/*/*nc",srcdir)) > 0
+    @test length(glob("*/*nc",resdir)) > 0
 end

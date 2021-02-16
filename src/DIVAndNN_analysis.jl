@@ -80,9 +80,8 @@ getcolumn(name) = data[:,findfirst(columnnames[:] .== name)]
 # check the depth range of the data
 minimumDepthInMeters = getcolumn("minimumDepthInMeters")
 maximumDepthInMeters = getcolumn("maximumDepthInMeters")
-@show extrema(minimumDepthInMeters)
-@show extrema(maximumDepthInMeters)
-
+@info "range of minimum depth $(extrema(minimumDepthInMeters))"
+@info "range of maximum depth $(extrema(maximumDepthInMeters))"
 
 # %% [markdown]
 # The prepare following fields:
@@ -226,8 +225,8 @@ end;
 # Number of data used for cross-validation and for the analysis
 
 # %%
-@show sum(for_cv)
-@show sum(.!for_cv)
+@info "Number of cross-valiation points: $(sum(for_cv))"
+@info "Number of data points for the analysis: $(sum(.!for_cv))"
 
 # %% [markdown]
 # time correlation (for 3d analyses)

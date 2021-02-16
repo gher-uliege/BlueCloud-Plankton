@@ -4,21 +4,25 @@ gridlon = -90.:0.5:40.
 gridlat = 30.:0.5:80.
 
 srcdir = dirname(pathof(BlueCloudPlankton))
+basedir = joinpath(srcdir,"..");
 
-datadir = joinpath(srcdir,"../data/")
-resdir = joinpath(srcdir,"../results/")
-figdir = joinpath(srcdir,"../figures/")
+# avoid network file system on BlueCloud
+basedir = expanduser("~/BlueCloud-data")
+
+datadir = joinpath(basedir,"data/")
+resdir = joinpath(basedir,"results/")
+figdir = joinpath(basedir,"figures/")
 
 if !isdir(datadir)
-    mkdir(datadir)
+    mkpath(datadir)
 end
 
 if !isdir(resdir)
-    mkdir(resdir)
+    mkpath(resdir)
 end
 
 if !isdir(figdir)
-    mkdir(figdir)
+    mkpath(figdir)
 end
 
 
