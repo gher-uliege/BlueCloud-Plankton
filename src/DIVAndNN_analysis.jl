@@ -28,7 +28,7 @@
 # ### Method
 #
 # DIVA (Data Interpolating Variational Analysis) aim to derive a gridded climatology from in situ observations. The  derived field should be
-#  __close to the observations__ (it should not necessarily pass through all observations because observations have errors), __close to a first guess estimate__, "__smooth__" (i.e. small first and second ordrer derivatives). The is formalized using the following cost functions.
+#  __close to the observations__ (it should not necessarily pass through all observations because observations have errors), __close to a first guess estimate__, "__smooth__" (i.e. small first and second ordrer derivatives). This is formalized using the following cost functions.
 #
 # $\newcommand{\vec}{\mathbf}\newcommand{\mat}{\mathbf}$
 # $$
@@ -69,7 +69,7 @@
 #
 # Here, the weight do not dependent on space but the longitude and latitude are one of the covariables.
 #
-# The following "Co-variables" are used:
+# The following "Co-variables" are used (with the data source in parenthesis):
 # * Sea water temperature (SeaDataCloud)
 # * Salinity (SeaDataCloud)
 # * Distance from coast (NASA Goddard Space Flight Center)
