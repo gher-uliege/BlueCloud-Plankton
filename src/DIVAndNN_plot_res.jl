@@ -125,3 +125,5 @@ plotfield(filenames[1]);
 
 # %%
 plotfield.(filenames);
+
+@info "Figures have been saved in $(figdir). Consider to copy the files to a permanent storage."

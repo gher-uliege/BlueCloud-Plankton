@@ -97,8 +97,8 @@ data_TS = [
     ("https://www.ncei.noaa.gov/thredds-ocean/dodsC/ncei/woa/phosphate/all/1.00/woa18_all_p00_01.nc","p_an","phosphate"),
 ]
 
-maybedownload("https://dox.ulg.ac.be/index.php/s/7zwCEszAPIFeBAm/download","../data/salinity.nc")
-maybedownload("https://dox.ulg.ac.be/index.php/s/OQMYYGFCEtS3xc9/download","../data/temperature.nc")
+maybedownload("https://dox.ulg.ac.be/index.php/s/7zwCEszAPIFeBAm/download",joinpath(datadir,"salinity.nc"))
+maybedownload("https://dox.ulg.ac.be/index.php/s/OQMYYGFCEtS3xc9/download",joinpath(datadir,"temperature.nc"))
 
 DIVAndNN.prep_tempsalt(gridlon,gridlat,data_TS,datadir)
 
@@ -371,3 +371,4 @@ open(paramname2,"w") do f
 end;
 
 
+@info "Results have been saved in $(outdir). Consider to copy the files to a permanent storage."
