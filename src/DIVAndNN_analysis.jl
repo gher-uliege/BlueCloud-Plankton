@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -7,18 +8,82 @@
 #       extension: .jl
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.3.4
+#       jupytext_version: 1.9.1
 #   kernelspec:
-#     display_name: Julia 1.5.1
+#     display_name: Julia 1.5.2
 #     language: julia
 #     name: julia-1.5
 # ---
 
 # %% [markdown]
-# # BlueCloud Zooplankton Demonstrator
+# <h1 style="text-align: center;">BlueCloud Zooplankton Demonstrator</h1>
+#
+# <p style="text-align: center;">Alexander Barth, Charles Troupin</p>
+# <p style="text-align: center;">GHER, University of Liège, Belgium</p>
 #
 # The aim of this notebook is to created a gridded dataset of the
-# Continuous Plankton Recorder within the VRE context of BlueCloud
+# [Continuous Plankton Recorder](https://www.cprsurvey.org/services/the-continuous-plankton-recorder/) within the Virtual Research Environement developped in BlueCloud.
+#
+#
+# ### Method
+#
+# DIVA (Data Interpolating Variational Analysis) aim to derive a gridded climatology from in situ observations. The  derived field should be
+#  __close to the observations__ (it should not necessarily pass through all observations because observations have errors), __close to a first guess estimate__, "__smooth__" (i.e. small first and second ordrer derivatives). The is formalized using the following cost functions.
+#
+# $\newcommand{\vec}{\mathbf}\newcommand{\mat}{\mathbf}$
+# $$
+# J(\vec x) =
+# \left(\mat H \vec x - \vec y \right)^T \mat R^{-1}  \left(\mat H \vec x - \vec y \right)
+# +
+# \left(\vec x - \vec x^b \right)^T \mat B^{-1}  \left(\vec x - \vec x^b \right)
+# $$
+#
+# DIVAnd typically use obervations from a single parameter to create gridded datasets.
+# In this notebook we explore the use of multivariate analysis using neural networks and DIVAnd.
+# Assuming that there is a list of covariables $\vec z_1, \vec z_2, ...$ related to the parameter of interest $\vec x$, we assume that gridded field can be writtes as:
+#
+# $$
+# \vec x = \vec x' + f(\vec z_1,\vec z_2,..., \mat W_1, \vec b_1, \mat W_2, \vec b_2,...)
+# $$
+#
+# where $f$ is a non-linear function of the known covariables and unknown parameters $\mat W_1, \vec b_1, \mat W_2, \vec b_2,...$)
+# The structure of the function $f$ is given here by a neural network (multilayer perception).
+# The field $\vec x'$ is also unknown. It is subjected to the smoothness contraints from DIVAnd.
+#
+# We want to minimize:
+#
+# $$\begin{eqnarray}
+# J(\vec x',\mat W_1, \vec b_1, \mat W_2, \vec b_2,...) &=&
+# \left(\mat H \vec x - \vec y \right)^T \mat R^{-1}  \left(\mat H \vec x - \vec y \right) \\\\
+# && +
+# \left(\vec x' - \vec x^b \right)^T \mat B^{-1}  \left(\vec x' - \vec x^b \right)
+# \end{eqnarray}$$
+#
+#
+# For every location $j$, the value of vector $\vec v^1$ are the co-variables at the location $j$.
+# This vector is linearly transformed by a matrix $\mat W_k$ and a vector $\vec b_k$ and then a non-linear activation function is applied to each element element of the resulting vector (except for the last step).
+#
+# $$
+# \mat v^{(k+1)}_j = g^{(k+1)}(\mat v^{(k)}_j \mat W_k + \vec b_k)
+# $$
+#
+# Here, the weight do not dependent on space but the longitude and latitude are one of the covariables.
+#
+# The following "Co-variables" are used:
+# * Sea water temperature (SeaDataCloud)
+# * Salinity (SeaDataCloud)
+# * Distance from coast (NASA Goddard Space Flight Center)
+# * Bathymetry (GEBCO)
+# * Nitrate, Silicate and Phosphate (World Ocean Atlas 2018)
+#
+#
+# The following figure gives a high-level overview of the different datasets involed in this notebook.
+#
+# ![overview](docs/overview.svg)
+#
+#
+#
+# _This notebook is release under the terms of the GPL version 2 (or later, at your option)_
 #
 # The first step is to install all dependencies (if necessary)
 
