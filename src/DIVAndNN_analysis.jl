@@ -307,17 +307,6 @@ for nameindex in 1:length(scientificname_accepted)
     end
 
 
-    loss_iter = []
-    val_iter = []
-
-    function plotres(i,lossi,value_analysis,y,gradloss,out,iobssel,obspos)
-        #@show extrema(value_analysis[isfinite.(value_analysis)])
-        vp = DIVAndNN.validate_regression(analysis_grid,value_analysis,xobs_cv,value_cv)
-        push!(loss_iter,lossi)
-        push!(val_iter,vp)
-        @printf("| %10d | %30.5f | %30.5f |\n",i,lossi,vp)
-    end
-
     value_analysis,fw0 = DIVAndNN.analysisprob(
         mask,pmn,xyi,xobs_a,
         value_a,
@@ -329,8 +318,6 @@ for nameindex in 1:length(scientificname_accepted)
         dropoutprob = dropoutprob,
         L2reg = L2reg,
         learning_rate = learning_rate,
-        plotres = plotres,
-        plotevery = plotevery,
         rmaverage = true,
         trainfrac = trainfrac,
         epsilon2_background = epsilon2_background,
@@ -355,8 +342,6 @@ for nameindex in 1:length(scientificname_accepted)
                 "learning_rate" =>    learning_rate,
                 "NLayers" =>    NLayers,
                 "name" =>    sname,
-                "loss_iter" => loss_iter,
-                "val_iter" => val_iter,
                 "covars" => first.(covars_fname),
             )
         ))
