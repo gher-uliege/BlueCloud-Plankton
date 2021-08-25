@@ -174,6 +174,11 @@ DIVAndNN.prep_tempsalt(gridlon,gridlat,data_TS,datadir)
 years = 0:3000
 ndimensions = 2
 
+years = 1990:2017
+#years = 1989:2017
+ndimensions = 3
+
+
 # %% [markdown]
 # Get bathymetry from GEBCO and prepare land-sea mask
 
@@ -299,7 +304,7 @@ end;
 # %%
 lent = 0. # years
 if ndimensions == 3
-    lent = 5.
+    lent = 1.
 end
 
 # %%
@@ -364,11 +369,13 @@ for nameindex in 1:length(scientificname_accepted)
         xobs_cv = (lon_cv,lat_cv,time_cv)
         lenxy = (len,len,lent)
         analysis_grid = (gridlon,gridlat,years)
+        analysis_grid2 = (gridlon,gridlat,DateTime.(years,1,1))
     else
         xobs_a = (lon_a,lat_a)
         xobs_cv = (lon_cv,lat_cv)
         lenxy = (len,len)
         analysis_grid = (gridlon,gridlat)
+        analysis_grid2 = (gridlon,gridlat)
     end
 
 
@@ -392,7 +399,7 @@ for nameindex in 1:length(scientificname_accepted)
     outname = joinpath(outdir,"DIVAndNN_$(sname)_interp.nc")
 
     cpme = DIVAnd_cpme(mask,pmn,xyi,xobs_a,value_a,lenxy,epsilon2_cpme)
-    DIVAnd.save(outname,(gridlon,gridlat),value_analysis,sname; relerr = cpme)
+    DIVAnd.save(outname,analysis_grid2,value_analysis,sname; relerr = cpme)
 
     open(paramname,"w") do f
         write(f,JSON.json(
