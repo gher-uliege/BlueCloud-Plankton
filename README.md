@@ -22,7 +22,7 @@ All input data are downloaded and imported automatically when the notebook is ex
 ## Software requirements
 
 The notebook needs Julia 1.5 or later (already preinstalled on BlueCloud). Additional Julia software packages are installed automatically if they are not present.
-The notebooks have been developed on Julia 1.5 and the versions of all software dependencies are saved in the file `Manifest.toml`.
+The notebooks have been developed on Julia 1.6 and the versions of all software dependencies are saved in the file `Manifest.toml`.
 Per default, Julia inside Jupyter environment will use the same versions (more information on [julia notebook](https://julialang.github.io/IJulia.jl/stable/manual/usage/#Julia-projects) and on [instantiating a julia environment](https://julialang.github.io/Pkg.jl/v1/environments/)) in order to enhance reproducibility of results.
 
 ## Running the notebook
