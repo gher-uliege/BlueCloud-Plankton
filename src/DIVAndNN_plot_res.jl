@@ -26,10 +26,12 @@ push!(LOAD_PATH,@__DIR__)
 using BlueCloudPlankton
 using Dates
 using JSON
+using VideoIO
 using PyPlot
 using Glob
 using Statistics
 using NCDatasets
+using Images
 
 # %%
 
@@ -143,5 +145,28 @@ plotfield(filenames[1]);
 
 # %%
 plotfield.(filenames);
+
+# %% [markdown]
+# Make an animation of the all species distribution
+
+# %%
+animation_format = "mp4"
+
+for filename in filenames
+    sname = split(basename(filename),"_")[2]
+    ds = Dataset(filename)
+
+    if haskey(ds,"time")
+        gridtime = ds["time"][:]
+
+        @info "Encode animation of $sname"
+
+        imgnames = [joinpath(figdir,"$sname-$n.png") for n = 1:length(gridtime)]
+        imgstack = [RGB.(Images.load(imgname)) for imgname in imgnames];
+        VideoIO.save(joinpath(figdir,"$sname.$animation_format"),imgstack,framerate = 2);
+    end
+
+    close(ds)
+end
 
 @info "Figures have been saved in $(figdir). Consider to copy the files to a permanent storage."
