@@ -20,18 +20,18 @@
 # This notebook plots the results from the previous notebook DIVAndNN_analysis.ipynb.
 
 # %%
+using VideoIO
+using Images
 using DIVAnd
 using DIVAndNN
 push!(LOAD_PATH,@__DIR__)
 using BlueCloudPlankton
 using Dates
 using JSON
-using VideoIO
 using PyPlot
 using Glob
 using Statistics
 using NCDatasets
-using Images
 
 # %%
 
