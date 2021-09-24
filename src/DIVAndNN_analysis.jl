@@ -304,7 +304,7 @@ end;
 # %%
 lent = 0. # years
 if ndimensions == 3
-    lent = 1.
+    lent = 3.
 end
 
 # %%
