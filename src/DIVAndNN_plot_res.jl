@@ -26,10 +26,12 @@ push!(LOAD_PATH,@__DIR__)
 using BlueCloudPlankton
 using Dates
 using JSON
+using VideoIO
 using PyPlot
 using Glob
 using Statistics
 using NCDatasets
+using Images
 
 # %%
 
@@ -81,42 +83,60 @@ function plotfield(filename)
     sname = split(basename(filename),"_")[2]
 
     ds = Dataset(filename)
-    value_analysis = nomissing(ds[sname * "_L1"][:,:],NaN)
+    value_analysis = nomissing(ds[sname * "_L1"][:],NaN)
     gridlon = ds["lon"][:]
     gridlat = ds["lat"][:]
+    gridtime =
+        if haskey(ds,"time")
+            ds["time"][:]
+        else
+            # there no time dimension in product
+            [nothing]
+        end
     close(ds)
 
-    sel = scientificNames .== sname
-    XY = DIVAnd.ndgrid(gridlon,gridlat)
-    value_binned = DIVAndNN.binobs((lon[sel],lat[sel]),value[sel],XY);
+    value_binned = zeros(length(gridlon),length(gridlat),length(gridtime))
+
+    for n = 1:length(gridtime)
+        sel = scientificNames .== sname
+
+        if gridtime[n] !== nothing
+            sel = sel .& (gridtime[n] .<= dates .<= (gridtime[n] + Dates.Year(1)))
+        end
+
+        XY = DIVAnd.ndgrid(gridlon,gridlat)
+        value_binned[:,:,n] = DIVAndNN.binobs((lon[sel],lat[sel]),value[sel],XY);
+    end
 
     cl = quantile(value_binned[isfinite.(value_binned)],[0.01, 0.99])
     if cl[1] == 0
         cl = (cl[2]/100,cl[2])
         @warn "setting explicitly lower scale to $(cl[1]) for $sname"
     end
-
     norm = PyPlot.matplotlib.colors.LogNorm(vmin=cl[1], vmax=cl[2])
 
-    clf()
-    fig.suptitle(sname,style="italic")
-    subplot(1,2,1)
-    pcolormesh(gridlon,gridlat,value_binned', norm = norm)
-    title("Binned observations")
-    decorate()
+    for n = 1:length(gridtime)
+        clf()
+        fig.suptitle("$sname $(Dates.year(gridtime[n]))",style="italic")
+        subplot(1,2,1)
+        pcolormesh(gridlon,gridlat,value_binned[:,:,n]', norm = norm)
+        title("Binned observations")
+        decorate()
 
 
-    subplot(1,2,2)
-    pcolormesh(gridlon,gridlat,value_analysis', norm = norm)
-    title("Analysis")
-    decorate()
-    savefig(joinpath(figdir,"$sname.png"))
+        subplot(1,2,2)
+        pcolormesh(gridlon,gridlat,value_analysis[:,:,n]', norm = norm)
+        title("Analysis")
+        decorate()
+        savefig(joinpath(figdir,"$sname-$n.png"))
+    end
 end
 
 # %% [markdown]
 # Plot the result for the first species
 
 # %%
+PyPlot.ioff()
 filenames = glob("*nc",expdir);
 plotfield(filenames[1]);
 
@@ -125,5 +145,28 @@ plotfield(filenames[1]);
 
 # %%
 plotfield.(filenames);
+
+# %% [markdown]
+# Make an animation of the all species distribution
+
+# %%
+animation_format = "mp4"
+
+for filename in filenames
+    sname = split(basename(filename),"_")[2]
+    ds = Dataset(filename)
+
+    if haskey(ds,"time")
+        gridtime = ds["time"][:]
+
+        @info "Encode animation of $sname"
+
+        imgnames = [joinpath(figdir,"$sname-$n.png") for n = 1:length(gridtime)]
+        imgstack = [RGB.(Images.load(imgname)) for imgname in imgnames];
+        VideoIO.save(joinpath(figdir,"$sname.$animation_format"),imgstack,framerate = 2);
+    end
+
+    close(ds)
+end
 
 @info "Figures have been saved in $(figdir). Consider to copy the files to a permanent storage."
