@@ -117,7 +117,14 @@ function plotfield(filename)
 
     for n = 1:length(gridtime)
         clf()
-        fig.suptitle("$sname $(Dates.year(gridtime[n]))",style="italic")
+        subtitle =
+            if gridtime[n] !== nothing
+                "$sname $(Dates.year(gridtime[n]))"
+            else
+                sname
+            end
+
+        fig.suptitle(subtitle,style="italic")
         subplot(1,2,1)
         pcolormesh(gridlon,gridlat,value_binned[:,:,n]', norm = norm)
         title("Binned observations")
