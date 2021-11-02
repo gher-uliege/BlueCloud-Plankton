@@ -205,7 +205,7 @@ version = "2.7.5"
 deps = ["CSV", "ClusterManagers", "DIVAnd", "DataFrames", "Dates", "DelimitedFiles", "FileIO", "Glob", "Interpolations", "JSON", "Knet", "MAT", "Missings", "NCDatasets", "Printf", "Proj4", "PyPlot", "Random", "Statistics", "Test"]
 git-tree-sha1 = "cbc461c333db16802ec864b0bf8990a5b5c7f55e"
 repo-rev = "master"
-repo-url = "/mnt/data1/abarth/.julia/dev/DIVAndNN"
+repo-url = "https://github.com/gher-ulg/DIVAndNN.jl"
 uuid = "1b7aed40-b1fd-11ea-290a-d1db0bf6404f"
 version = "0.1.0"
 
@@ -366,9 +366,9 @@ version = "8.1.2"
 
 [[GPUCompiler]]
 deps = ["ExprTools", "InteractiveUtils", "LLVM", "Libdl", "Logging", "TimerOutputs", "UUIDs"]
-git-tree-sha1 = "ba475ea91facd7bde9f0f113f60e975882b4f5ca"
+git-tree-sha1 = "77d915a0af27d474f0aaf12fcd46c400a552e84c"
 uuid = "61eb1bfa-7361-4325-ad38-22787b887f55"
-version = "0.13.6"
+version = "0.13.7"
 
 [[Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
