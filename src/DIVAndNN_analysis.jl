@@ -109,6 +109,7 @@ using Random
 using NCDatasets
 using DelimitedFiles
 using Statistics
+push!(LOAD_PATH,"/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
 push!(LOAD_PATH,@__DIR__)
 using BlueCloudPlankton
 using DataStructures

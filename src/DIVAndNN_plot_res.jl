@@ -24,6 +24,7 @@ using VideoIO
 using Images
 using DIVAnd
 using DIVAndNN
+push!(LOAD_PATH,"/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
 push!(LOAD_PATH,@__DIR__)
 using BlueCloudPlankton
 using Dates
