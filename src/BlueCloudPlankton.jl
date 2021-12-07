@@ -47,7 +47,7 @@ function read_data(datafile::String)
     df = DateFormat("y-m-d H:M:S.s");
     dates = DateTime.(getcolumn("eventDate"), df);
 
-    return lon, lat, dates, abundance, scientificNames
+    return Float64.(lon), Float64.(lat), dates, Float64.(abundance), String.(scientificNames)
 
 end
 
