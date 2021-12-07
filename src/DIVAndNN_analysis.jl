@@ -10,9 +10,9 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.9.1
 #   kernelspec:
-#     display_name: Julia 1.5.2
+#     display_name: Julia 1.7.0
 #     language: julia
-#     name: julia-1.5
+#     name: julia-1.7
 # ---
 
 # %% [markdown]
