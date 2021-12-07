@@ -20,11 +20,12 @@
 # This notebook plots the results from the previous notebook DIVAndNN_analysis.ipynb.
 
 # %%
+srcdir = get(ENV,"SRCDIR","/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
 using VideoIO
 using Images
 using DIVAnd
 using DIVAndNN
-push!(LOAD_PATH,"/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
+push!(LOAD_PATH,srcdir)
 push!(LOAD_PATH,@__DIR__)
 using BlueCloudPlankton
 using Dates
@@ -35,8 +36,7 @@ using Statistics
 using NCDatasets
 
 # %%
-
-include("grid.jl")
+include(joinpath(srcdir,"grid.jl"))
 datafile = joinpath(datadir, "data-cpr.csv")
 
 # %% [markdown]
