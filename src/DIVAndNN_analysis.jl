@@ -103,7 +103,10 @@ end
 # Load the modules
 
 # %%
-srcdir = get(ENV,"SRCDIR","/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
+srcdir = @__DIR__
+if !isfile(joinpath(srcdir,"grid.jl"))
+    srcdir = get(ENV,"SRCDIR","/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
+end
 using DIVAnd
 using DIVAndNN
 using Random

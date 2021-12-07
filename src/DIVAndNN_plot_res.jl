@@ -20,7 +20,10 @@
 # This notebook plots the results from the previous notebook DIVAndNN_analysis.ipynb.
 
 # %%
-srcdir = get(ENV,"SRCDIR","/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
+srcdir = @__DIR__
+if !isfile(joinpath(srcdir,"grid.jl"))
+    srcdir = get(ENV,"SRCDIR","/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
+end
 using VideoIO
 using Images
 using DIVAnd
@@ -145,7 +148,7 @@ end
 
 # %%
 PyPlot.ioff()
-filenames = glob("*nc",expdir);
+filenames = glob("*interp.nc",expdir);
 plotfield(filenames[1]);
 
 # %% [markdown]

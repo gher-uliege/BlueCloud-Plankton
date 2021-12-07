@@ -1,3 +1,4 @@
+using VideoIO
 using Test
 using Dates
 using Statistics
