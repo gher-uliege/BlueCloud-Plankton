@@ -33,21 +33,21 @@ julia> lon, lat, dates, abundance, scientificNames = read_data(datafile)
 ```
 """
 function read_data(datafile::String)
+    getcolumn(name) = data[:,findfirst(columnnames[:] .== name)]
 
     data, columnnames = readdlm(datafile, ',', header=true);
 
     # Extract coordinates
-    lat_index = findall(columnnames .== "decimalLatitude");
-    lat = data[:,5];
-    lon = data[:,6];
-    abundance = Float64.(data[:,15]);
-    scientificNames = data[:,10];
+    lat = getcolumn("decimalLatitude");
+    lon = getcolumn("decimalLongitude");
+    abundance = Float64.(getcolumn("abundance"));
+    scientificNames = getcolumn("scientificName")
 
     # Parse dates
     df = DateFormat("y-m-d H:M:S.s");
-    dates = DateTime.(data[:,4], df);
+    dates = DateTime.(getcolumn("eventDate"), df);
 
-    return lon, lat, dates, abundance, scientificNames
+    return Float64.(lon), Float64.(lat), dates, Float64.(abundance), String.(scientificNames)
 
 end
 

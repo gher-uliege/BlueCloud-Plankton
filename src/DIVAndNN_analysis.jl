@@ -174,9 +174,8 @@ DIVAndNN.prep_tempsalt(gridlon,gridlat,data_TS,datadir)
 years = 0:3000
 ndimensions = 2
 
-years = 1990:2017
-#years = 1989:2017
-ndimensions = 3
+#years = 1990:2017
+#ndimensions = 3
 
 
 # %% [markdown]
