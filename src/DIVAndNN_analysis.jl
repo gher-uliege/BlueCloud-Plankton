@@ -103,12 +103,14 @@ end
 # Load the modules
 
 # %%
+srcdir = get(ENV,"SRCDIR","/workspace/VREFolders/Zoo-Phytoplankton_EOV/DIVAndNN/bluecloud-plankton-master/src/")
 using DIVAnd
 using DIVAndNN
 using Random
 using NCDatasets
 using DelimitedFiles
 using Statistics
+push!(LOAD_PATH,srcdir)
 push!(LOAD_PATH,@__DIR__)
 using BlueCloudPlankton
 using DataStructures
@@ -122,7 +124,7 @@ using PyPlot
 
 # %%
 Random.seed!(1234)
-include("grid.jl")
+include(joinpath(srcdir,"grid.jl"))
 
 # %% [markdown]
 # Data frome the continuous plankton recorder
