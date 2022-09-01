@@ -35,6 +35,12 @@ jobs:
       - run: |
           git config --global user.name Tester
           git config --global user.email te@st.er
+      - name: Install Cartopy
+        run: |
+          export PYTHON=""
+          julia --project=@. -e "using Pkg; Pkg.build()"
+          julia --project=@. -e 'using Pkg; pkg"add Conda"'
+          julia --project=@. -e 'using Conda; Conda.add("Cartopy")'
       - uses: julia-actions/julia-runtest@latest
         continue-on-error: ${{ matrix.version == 'nightly' }}
       - uses: julia-actions/julia-processcoverage@v1
