@@ -1,3 +1,6 @@
+[![Build Status](https://github.com/gher-ulg/BlueCloud-Plankton/workflows/CI/badge.svg)](https://github.com/gher-ulg/BlueCloud-Plankton/actions)
+
+
 
 # Interpolation of zooplankton data using the inverse methods DIVAnd and neural networks
 
