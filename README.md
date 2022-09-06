@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/gher-ulg/BlueCloud-Plankton/workflows/CI/badge.svg)](https://github.com/gher-ulg/BlueCloud-Plankton/actions)[![DOI](https://zenodo.org/badge/531522783.svg)](https://zenodo.org/badge/latestdoi/531522783)
+[![Build Status](https://github.com/gher-ulg/BlueCloud-Plankton/workflows/CI/badge.svg)](https://github.com/gher-ulg/BlueCloud-Plankton/actions) [![DOI](https://zenodo.org/badge/531522783.svg)](https://zenodo.org/badge/latestdoi/531522783)
 
 
 
